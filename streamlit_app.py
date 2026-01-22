@@ -12,7 +12,7 @@ import os
 # Configure page
 st.set_page_config(
     page_title="ID Card Attendance System",
-    page_icon="🎓",
+    page_icon="",
     layout="centered"
 )
 
@@ -33,11 +33,11 @@ MAX_ATTEMPTS = 3
 ATTENDANCE_FILE = "attendance.csv"
 
 # Title and description
-st.title("🎓 ID Card Attendance System")
+st.title(" ID Card Attendance System")
 st.markdown("Upload or capture an image of your ID card to mark attendance")
 
 # Sidebar for settings
-st.sidebar.header("⚙️ Settings")
+st.sidebar.header(" Settings")
 confidence_threshold = st.sidebar.slider(
     "Confidence Threshold", 
     min_value=0.5, 
@@ -49,7 +49,7 @@ st.sidebar.info(f"Current attempt: {st.session_state.attempt_count + 1}/{MAX_ATT
 
 # Sidebar - Attendance Management
 st.sidebar.markdown("---")
-st.sidebar.header("📋 Attendance Management")
+st.sidebar.header(" Attendance Management")
 
 # Show current stats
 if os.path.exists(ATTENDANCE_FILE):
@@ -64,24 +64,24 @@ else:
     st.sidebar.info("No attendance records yet")
 
 # Clear/Reset options
-st.sidebar.markdown("### 🗑️ Clear Attendance")
+st.sidebar.markdown("###  Clear Attendance")
 
 col1, col2 = st.sidebar.columns(2)
 
 with col1:
-    if st.button("🔄 Clear Today", help="Clear only today's attendance"):
+    if st.button(" Clear Today", help="Clear only today's attendance"):
         if os.path.exists(ATTENDANCE_FILE):
             df = pd.read_csv(ATTENDANCE_FILE)
             today = str(datetime.now().date())
             df = df[df["Date"] != today]
             df.to_csv(ATTENDANCE_FILE, index=False)
-            st.sidebar.success("✅ Today's attendance cleared!")
+            st.sidebar.success(" Today's attendance cleared!")
             st.rerun()
         else:
             st.sidebar.warning("No records to clear")
 
 with col2:
-    if st.button("🗑️ Clear All", help="Clear all attendance records"):
+    if st.button(" Clear All", help="Clear all attendance records"):
         if os.path.exists(ATTENDANCE_FILE):
             # Backup before clearing
             backup_name = f"attendance_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
@@ -90,13 +90,13 @@ with col2:
 
             # Clear the file
             pd.DataFrame(columns=["Roll_No", "Date", "Time"]).to_csv(ATTENDANCE_FILE, index=False)
-            st.sidebar.success(f"✅ All records cleared!\n📦 Backup saved: {backup_name}")
+            st.sidebar.success(f" All records cleared!\n Backup saved: {backup_name}")
             st.rerun()
         else:
             st.sidebar.warning("No records to clear")
 
 # New Class button
-if st.sidebar.button("📚 Start New Class Session", help="Archive current data and start fresh", type="primary"):
+if st.sidebar.button(" Start New Class Session", help="Archive current data and start fresh", type="primary"):
     if os.path.exists(ATTENDANCE_FILE):
         # Archive with timestamp
         archive_name = f"attendance_class_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
@@ -105,7 +105,7 @@ if st.sidebar.button("📚 Start New Class Session", help="Archive current data 
 
         # Clear current file
         pd.DataFrame(columns=["Roll_No", "Date", "Time"]).to_csv(ATTENDANCE_FILE, index=False)
-        st.sidebar.success(f"✅ New session started!\n📦 Previous data archived: {archive_name}")
+        st.sidebar.success(f" New session started!\n Previous data archived: {archive_name}")
         st.rerun()
     else:
         st.sidebar.info("No previous session to archive")
@@ -117,7 +117,7 @@ def initialize_model():
         runner.init()
         return runner
     except Exception as e:
-        st.error(f"❌ Error loading model: {str(e)}")
+        st.error(f" Error loading model: {str(e)}")
         return None
 
 def detect_id_card(img, runner, threshold):
@@ -137,7 +137,7 @@ def detect_id_card(img, runner, threshold):
 
         return best_box, confidence, res
     except Exception as e:
-        st.error(f"❌ Detection error: {str(e)}")
+        st.error(f" Detection error: {str(e)}")
         return None, 0.0, None
 
 def extract_roll_number(img):
@@ -159,7 +159,7 @@ def extract_roll_number(img):
 
         return roll_no, text
     except Exception as e:
-        st.error(f"❌ OCR error: {str(e)}")
+        st.error(f" OCR error: {str(e)}")
         return None, ""
 
 def mark_attendance(roll_no):
@@ -187,11 +187,11 @@ def mark_attendance(roll_no):
             })
             df = pd.concat([df, new_entry], ignore_index=True)
             df.to_csv(ATTENDANCE_FILE, index=False)
-            return True, "✅ Attendance marked successfully!"
+            return True, " Attendance marked successfully!"
         else:
-            return False, "⚠️ Attendance already marked today"
+            return False, " Attendance already marked today"
     except Exception as e:
-        return False, f"❌ Error marking attendance: {str(e)}"
+        return False, f" Error marking attendance: {str(e)}"
 
 def process_image(img, runner, threshold):
     """Process image and return results"""
@@ -201,29 +201,29 @@ def process_image(img, runner, threshold):
         st.image(cv2.cvtColor(img, cv2.COLOR_BGR2RGB), caption="Captured/Uploaded Image", use_container_width=True)
 
     # Detect ID card
-    with st.spinner("🔍 Detecting ID card..."):
+    with st.spinner(" Detecting ID card..."):
         box, confidence, res = detect_id_card(img, runner, threshold)
 
     # Check confidence
     if box is None or confidence < threshold:
         st.session_state.attempt_count += 1
 
-        st.error(f"❌ ID card confidence too low: {confidence:.2%}")
-        st.warning(f"⚠️ Please retry with a clearer image")
+        st.error(f" ID card confidence too low: {confidence:.2%}")
+        st.warning(f" Please retry with a clearer image")
 
         if st.session_state.attempt_count < MAX_ATTEMPTS:
-            st.info(f"📸 Attempts remaining: {MAX_ATTEMPTS - st.session_state.attempt_count}")
+            st.info(f" Attempts remaining: {MAX_ATTEMPTS - st.session_state.attempt_count}")
             return False
         else:
-            st.error("❌ Maximum attempts reached. Please contact administrator.")
+            st.error(" Maximum attempts reached. Please contact administrator.")
             st.session_state.attempt_count = 0
             return False
 
     # ID card verified
-    st.success(f"✅ ID Card verified with confidence: {confidence:.2%}")
+    st.success(f" ID Card verified with confidence: {confidence:.2%}")
 
     # Extract roll number
-    with st.spinner("📄 Extracting roll number..."):
+    with st.spinner(" Extracting roll number..."):
         roll_no, extracted_text = extract_roll_number(img)
 
     with col2:
@@ -231,17 +231,17 @@ def process_image(img, runner, threshold):
         st.text_area("OCR Output", extracted_text, height=200)
 
     if roll_no is None:
-        st.error("❌ Roll number not found in the image")
+        st.error(" Roll number not found in the image")
         st.session_state.attempt_count += 1
         if st.session_state.attempt_count < MAX_ATTEMPTS:
-            st.info(f"📸 Attempts remaining: {MAX_ATTEMPTS - st.session_state.attempt_count}")
+            st.info(f" Attempts remaining: {MAX_ATTEMPTS - st.session_state.attempt_count}")
         return False
 
     # Display roll number
-    st.success(f"🎓 Roll Number Detected: **{roll_no}**")
+    st.success(f" Roll Number Detected: **{roll_no}**")
 
     # Mark attendance
-    with st.spinner("📝 Marking attendance..."):
+    with st.spinner(" Marking attendance..."):
         success, message = mark_attendance(roll_no)
 
     if success:
@@ -259,7 +259,7 @@ def main():
     # Choose input mode
     st.markdown("---")
     input_mode = st.radio(
-        "📷 Choose Input Method:",
+        " Choose Input Method:",
         ["Upload Image", "Capture from Webcam"],
         horizontal=True
     )
@@ -280,7 +280,7 @@ def main():
             img_to_process = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
     else:  # Capture from Webcam
-        st.markdown("### 📸 Webcam Capture")
+        st.markdown("###  Webcam Capture")
 
         # Camera input using st.camera_input
         camera_photo = st.camera_input("Take a photo of your ID card")
@@ -293,12 +293,12 @@ def main():
 
     # Process button
     if img_to_process is not None:
-        if st.button("🚀 Process Image", type="primary"):
+        if st.button(" Process Image", type="primary"):
             # Initialize model
             runner = initialize_model()
 
             if runner is None:
-                st.error("❌ Failed to initialize model")
+                st.error(" Failed to initialize model")
                 return
 
             try:
@@ -308,13 +308,13 @@ def main():
 
         # Reset button
         if st.session_state.attempt_count > 0:
-            if st.button("🔄 Reset Attempts"):
+            if st.button(" Reset Attempts"):
                 st.session_state.attempt_count = 0
                 st.rerun()
 
     # Display attendance records
     st.markdown("---")
-    st.subheader("📊 Attendance Records")
+    st.subheader(" Attendance Records")
 
     if os.path.exists(ATTENDANCE_FILE):
         df = pd.read_csv(ATTENDANCE_FILE)
@@ -347,7 +347,7 @@ def main():
             # Download button
             csv = df.to_csv(index=False).encode('utf-8')
             st.download_button(
-                label="📥 Download Attendance CSV",
+                label=" Download Attendance CSV",
                 data=csv,
                 file_name=f"attendance_{datetime.now().strftime('%Y%m%d')}.csv",
                 mime="text/csv"
