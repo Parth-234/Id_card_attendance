@@ -155,7 +155,7 @@ def extract_roll_number(img):
             return None, text
 
         roll_full = match.group()
-        roll_no = roll_full[-4:]  # Last 4 digits
+        roll_no = roll_full  # Last 4 digits
 
         return roll_no, text
     except Exception as e:
@@ -173,11 +173,8 @@ def mark_attendance(roll_no):
         now = datetime.now()
         today = str(now.date())
 
-        # Check if already marked
-        already_marked = df[
-            (df["Roll_No"] == roll_no) & 
-            (df["Date"] == today)
-        ]
+        # Check if roll number already exists anywhere in the database
+        already_marked = df[df["Roll_No"] == roll_no]
 
         if already_marked.empty:
             new_entry = pd.DataFrame({
@@ -189,7 +186,7 @@ def mark_attendance(roll_no):
             df.to_csv(ATTENDANCE_FILE, index=False)
             return True, " Attendance marked successfully!"
         else:
-            return False, " Attendance already marked today"
+            return False, " This roll number has already been recorded"
     except Exception as e:
         return False, f" Error marking attendance: {str(e)}"
 
@@ -246,7 +243,6 @@ def process_image(img, runner, threshold):
 
     if success:
         st.success(message)
-        st.balloons()
     else:
         st.warning(message)
 
